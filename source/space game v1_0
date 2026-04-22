@@ -1,0 +1,589 @@
+title SPACE GAME
+author riverpaper
+homepage riverpaper.itch.io
+
+sitelock_hostname_whitelist riverpaper.itch.io
+
+export_options notitle,nofooter
+
+// comments can look like this yippee
+
+key_repeat_interval 0.3
+noaction
+//norepeat_action
+require_player_movement
+scanline
+
+enable_pause
+level_select
+level_select_lock
+level_select_solve_symbol ✓
+
+title_color lightblue
+author_color #f0a070
+( text_color lightblue )
+
+text_controls arrows keys or wasd to move\nspace to select, esc to pause/back\nz to undo, r to restart
+text_message_continue (space to continue)
+
+sprite_size 8
+
+
+========
+objects
+========
+
+shipwall
+#45283c darkgray
+00000000
+01100110
+01100110
+00000000
+00000000
+01100110
+01100110
+00000000
+
+bgwall
+#222034
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+
+space
+black #222034
+00000000
+00000000
+00000000
+00000000
+00000000
+00000010
+00100000
+00000000
+
+asteroid
+#663931 darkgray
+...001..
+..0010..
+.000010.
+.1001101
+00100010
+0100000.
+.10011..
+..110...
+
+playerspawn
+darkblue
+........
+...00...
+...00...
+.000000.
+.000000.
+...00...
+...00...
+........
+
+trail
+#306082
+........
+....000.
+....000.
+.....00.
+.00..00.
+.00.....
+.0000...
+........
+
+player
+lightblue
+........
+....00..
+...000..
+...0000.
+..00000.
+.00000..
+..00....
+........
+
+point
+#99e550
+........
+........
+........
+...00...
+...00...
+........
+........
+........
+
+holder
+orange
+........
+.00..00.
+.0....0.
+........
+........
+.0....0.
+.00..00.
+........
+
+border
+transparent
+........
+........
+........
+........
+........
+........
+........
+........
+
+endtrigger
+transparent
+........
+........
+........
+........
+........
+........
+........
+........
+
+
+=======
+legend
+=======
+
+wall = shipwall or asteroid
+background = space
+. = space
+# = shipwall
+a = asteroid and space
+p = player and space
+w = bgwall
+q = player and bgwall
+t = trail and space
+o = point and space
+k = point and bgwall
+h = holder and space
+j = point and holder and space
+y = holder and bgwall
+u = point and holder and bgwall
+x = border and space
+c = border and bgwall
+e = endtrigger
+
+
+=======
+sounds
+=======
+
+sfx0 46722500 (collect point)
+sfx1 37652107 (stop wall)
+sfx2 41791107 (stop trail)
+sfx3 51296505 (move slide)
+
+sfx5 99327703 (win)
+sfx6 88755105 (empty holder)
+sfx7 63390903 (point holder)
+
+sfx10 30025502 (off screen)
+
+
+================
+collisionlayers
+================
+
+border, endtrigger
+space, bgwall
+point
+player, playerspawn, trail, wall
+holder
+
+
+======
+rules
+======
+
+// player move if path is clear
+[ > player | no wall no trail no holder ] -> [ trail | > player ]
+
+// player stop on wall
+[ > player | wall ] -> [ player | wall ] sfx1
+
+// player stop on trail
+[ > player | trail ] -> [ player | trail ] sfx2
+
+// player stop on holder
+[ > player | holder no trail ] -> [ trail | player holder]
+
+// sound on empty holder
+[ player holder no point ] -> [ player holder ] sfx6
+
+// sound on point holder
+late [ player holder point ] -> [ player holder no point ] sfx7
+
+// no trail on bgwall
+late [ bgwall trail ] -> [ bgwall no trail ]
+
+// kill on border
+late [ player border no bgwall ] -> [ no player trail border ] sfx10
+late [ player border bgwall ] -> [ no player border bgwall ] sfx10
+
+// collect point
+late [ player point ] -> [ player no point ] sfx0
+
+
+==============
+winconditions
+==============
+
+no point
+
+
+=======
+levels
+=======
+
+message section 1 - ship interior
+section 1 - ship interior
+
+level 1.1 intro to movement
+######
+.##k#.
+.#ww#.
+.#q##.
+######
+
+level 1.2 move until you hit a wall
+##########.
+.##kw##wk#.
+..#ww..ww#a
+..##....##a
+..##....##.
+a.#wq..ww#.
+a##kw##wk#.
+##########.
+
+level 1.3 you're in space, after all
+######..##
+##kw######
+.#wwwwk##.
+.##.www#..
+..#..ww#..
+..#w..w##a
+.##qw.ww#a
+######wk##
+##....####
+
+level 1.4 tomb of the mask reference
+############...
+..##kwwwwwk#...
+...#w##.##w#.a.
+a..#w#wwwww#aa.
+a.##w#w.####aaa
+..#kwwk.wwk#...
+..#w##www#w#...
+..#w###.##w#.aa
+..#w#wwwwwk#.a.
+.##kwqwk#####..
+###########....
+
+level 1.5 airlock
+......a.
+a.#h###a
+aa#o..#.
+a####.##
+.#....##
+##.#####
+##wwwww#
+######w#
+#qwwwww#
+########
+
+message section 2 - outside hull
+section 2 - outside hull
+
+level 2.1 you can't overshoot
+#####
+#.###
+#o..#
+..w.a
+a.w..
+..w..
+#p..#
+##.##
+#####
+
+level 2.2 secret tunnel
+xxx######
+#...##k.#
+#w#...wo#
+xw#...w#x
+xw#p..wox
+#.....k.#
+##xxax###
+
+level 2.3 now you're even more in space
+####xaaxaa
+##k.xx####
+x.www.k##x
+x##.www..x
+x##..ww..x
+x#wka.w#.x
+x#wqk.ww.x
+#####.wk#a
+##xxxx###a
+
+level 2.4 precision aim
+.#c######x
+##w##o#o#x
+cww##w#w#x
+x.w#owww.x
+x.w.#.##wx
+xwkw.kwk.#
+xp..##...x
+x##xxxxxxx
+( xxx######x )
+( #####o#o#x )
+( cww##w#w#x )
+( x.w#owww.x )
+( x.w.#.##wx )
+( xwww.kwk.# )
+( xq.w##...x )
+( xwwk#....x )
+( xx#xxxxxxx )
+
+level 2.5 going out further
+#xaxxxxxxxx##x
+#...a......wox
+cp...........x
+x...........hx
+x..a........#x
+##xxxxxxxxxx##
+
+
+message section 3 - treacherous repairs
+section 3 - treacherous repairs
+
+level 3.1 greater things
+xxx#xxxxxxx
+x#.#.h.o##.
+xo.#...a###
+#w.w.www.##
+x........##
+#qwwww.ww.#
+##...#oww.#
+###x###xx##
+
+level 3.2 dreams of space
+// my favourite level for starting it all
+xxxxxxxxxxxxxx
+xj...jaajw..jx
+x.aaa.aa.###.x
+x.aaa.aa.###.x
+xhww.h..h...hx
+x.###.aa.aaa.x
+x.###.aa.aaa.x
+xj..wjaaj...jx
+x............x
+c............c
+cw.p....#ww..#
+#####xxx##ccx#
+// undecorated version
+( xxxxxxxxxxxxxx )
+( xj...jaaj...jx )
+( x.aaa.aa.###.x )
+( x.aaa.aa.###.x )
+( xh...h..h...hx )
+( x.###.aa.aaa.x )
+( x.###.aa.aaa.x )
+( xj...jaaj...jx )
+( x............x )
+( c............c )
+( cw.p....#ww..# )
+( #####xxx##ccx# )
+
+level 3.3 ship's crown
+#..#.##..##.#..#
+####.######.####
+x##############x
+x#.....h....h.#x
+x..www#..#www..x
+x..w#wh..hw#w..x
+x.#....##....#.x
+xh.kwwkwwkwwk.hx
+x..#..#..#..#..x
+x...p.....h....x
+x....######....x
+xxxxxxx##xxxxxxx
+
+level 3.4 hold on now
+###xxx#xxxxxxxxx
+####.........a.x
+x........a.....x
+x.hkwh.wh.wh...x
+x.w.aww.ww.ww..x
+x.whwwhk.h.wh.ax
+x.ww..w..w..w..x
+x.qwhwwhwwhkwh.x
+x...........a..x
+##...a.........x
+###xxxxxaxxxxxxx
+
+level 3.5 falling behind
+####xxxxcccccccxxxxwxxxx
+##wwwwwwwoa....www...w.w
+#.w.....wwwwka.hx..h...x
+x...wwww........x...h.jx
+x..............oa..h.w.x
+#.w....wwwwka...x......x
+##wqwwwka...wwwwxhw.h..x
+####xxxxxccccxxxxxxxxxwx
+
+
+message section 4 - fallen behind
+section 4 - fallen behind
+
+level 4.1 rough landing
+xxxxxxxxxxxxxxx
+x.a.........a.x
+a.wwwa..wwaww.x
+x.w.w....w.wkax
+x.w......w.wy.x
+x.w......w.w..x
+x.w......w.k..x
+xowa.......a..x
+xawpa.........x
+xawwwwwwwwwwk.x
+x.aao.......a.x
+xxxxxxxxxxaxxxx
+
+level 4.2 scrap pile
+xxxxxxxxxxxxxxxx
+x.a..a.........x
+awwwwwwwwoa....x
+xwwwwwwwwwwwwoax
+xaw......www.woa
+xwwwww..oa...wwx
+x....w.......wwx
+xwpwwoa......wwx
+awwwwwww.wwwwwwx
+x.w..........awx
+xawwwwwwwwwwwwwx
+xxxxxxxxxxxxxxax
+
+level 4.3 loud dagger
+xxxxxxxxxxxxxxxxxxx
+x.h....a....a.....x
+xa..h..j..h..a....x
+x............oa...x
+x....w.......w....x
+xqwwwwwyww..ww.wkax
+x...w.......w.....x
+x.................x
+xa..h.....j...a...x
+x.h....j.....a....x
+x......a....a.....x
+xxxxxxxxxxxxxxxxxxx
+
+level 4.4 xi-1
+// my second-favourite level for the silly reference
+xxxxxxxaxxaxxxxxxxxxxxx
+x...akww..............x
+x.a..w.w..............x
+xqwywuwwa.............x
+x..a.w.a..............x
+x....kwywoa...........x
+x....a.w.w.a.........ax
+x..uwywyku.......aakwwx
+a..w....a.....a....w.wx
+x..hwj.a.jwhwj.a.jwywwa
+x..w.w...w...w.a.w.w..x
+x..hkuwhwh..ah..ah.h.ax
+x...a........w...w.w..x
+x............jwhwh.hwka
+xxxxxxxxxxxxxxxxxxxxxxx
+// tried to make it kill if you leave the track, but borders aren't programmed properly for that -- also not updated with above
+( xxxxxxxaxxaxxxxxxxxxxxx )
+( x...akwwx...a.a.a.....a )
+( xxaxxw.wx...a.a.a....aa )
+( xqwhwuwwa....a..a.aa..a )
+( xxxaxwxaxxx.a.a.a.....a )
+( x...xjwkwux.a.a.a.....a )
+( x.xxxa.w.wx.......xxxxx )
+( x.xhwjwywux.......xhwjx )
+( x.awxxxxxxxxxxx.xxxw.wx )
+( x.xywja.xjwhwjxaxjwywjx )
+( x.xw.wxxxwxxxwx.xwxwxxx )
+( x.xwwuwhwjx.xjx.ajxhxax )
+( x.xaxxxxxxx.xwxxxwxwxxx )
+( x...........xjwhwjxhwka )
+( xxxxxxxxxxxxxxxxxxxxxxx )
+
+level 4.5 oxygen level critical
+xxxxxxxxxxxxxxxxx
+x........a......x
+x.a......w..h...x
+xhwwwh.a.w..wa..x
+xw..aw.w.w...w.hx
+xw.....whw..hw.wx
+xw.wwwak.kaw.w.wx
+xw.k.......w.w.wx
+xw.akwwwqwka.wawx
+xw.w.......k.w.wx
+xw.w..ak.ka..w.wx
+xwhw...whw...wwhx
+xw.a...w.wwwaw..x
+xhwww..w.a...h..x
+x...hwww......a.x
+x......a........x
+xxxxxxxxxxxxxxxxx
+
+
+( message section 5 - deep space )
+( section 5 - deep space )
+
+
+message section ending
+section ending
+
+level ending
+p....x
+
+message space game\nby riverpaper\nv1.0
+
+level ending
+p........x
+
+message everything made by me
+
+level ending
+p............x
+
+message using puzzlescript next\n(which is not by me)
+
+level ending
+p..................x
+
+message my first puzzle game\nmy first game in an engine\nmy first (solo) game on itch.io
+
+level ending
+p............................x
+
+message thank you for playing <3
+
+( section bonus - cover art )
+
+( level dreams of game )
+( ##aatcx )
+( #kwwwja )
+( #twh.wc )
+( ##pwj.a )
+( ##tcaax )
+
